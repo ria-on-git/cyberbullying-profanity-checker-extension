@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-22T16:30:58.211Z",
+  "steps": [
+    {
+      "name": "Legacy arrays migrate once, deduplicate, and preserve unreviewed feedback without guessing labels",
+      "result": "passed"
+    },
+    {
+      "name": "Initial visible blocks, exclusions, nested blocks and matching warning explanations",
+      "result": "passed"
+    },
+    {
+      "name": "Closed Shadow DOM isolates hostile page CSS and toggles Why details",
+      "result": "passed"
+    },
+    {
+      "name": "Actual toolbar popup shows completed scan with current warnings",
+      "result": "passed"
+    },
+    {
+      "name": "New comments scan incrementally without resubmitting unchanged text or duplicate warnings",
+      "result": "passed"
+    },
+    {
+      "name": "Edited and removed comments lose stale warnings immediately",
+      "result": "passed"
+    },
+    {
+      "name": "Character edits and hide/show changes invalidate only affected blocks",
+      "result": "passed"
+    },
+    {
+      "name": "Moving a warned block into a form removes its old warning and rescans when moved back",
+      "result": "passed"
+    },
+    {
+      "name": "Sensitivity changes reevaluate existing text with the actual API decision",
+      "result": "passed"
+    },
+    {
+      "name": "Popup shows loading, and disabling during a pending response prevents warnings returning",
+      "result": "passed"
+    },
+    {
+      "name": "Inline outline values and !important priorities restore; page changes survive cleanup",
+      "result": "passed"
+    },
+    {
+      "name": "Edits, removals, and sensitivity changes reject stale in-flight results",
+      "result": "passed"
+    },
+    {
+      "name": "No-detections completion and popup reopen show current state, not history totals",
+      "result": "passed"
+    },
+    {
+      "name": "Real API-offline state and retry recover without misleading completion",
+      "result": "passed"
+    },
+    {
+      "name": "Detection records deduplicate across rescans and retain full prediction snapshots",
+      "result": "passed"
+    },
+    {
+      "name": "Two tabs save concurrent unique reports without loss and repeated saves produce one record",
+      "result": "passed"
+    },
+    {
+      "name": "Popup report and incorrect actions deduplicate; incorrect feedback has no inferred replacement label",
+      "result": "passed"
+    },
+    {
+      "name": "Human review keeps independent uncertain labels and preserves drafts during other-tab saves",
+      "result": "passed"
+    },
+    {
+      "name": "Separate views export actual local JSON downloads; reviewed export excludes unreviewed feedback",
+      "result": "passed"
+    },
+    {
+      "name": "Retention evicts oldest records above 200 per view without changing feedback or detections",
+      "result": "passed"
+    },
+    {
+      "name": "Scope-aware clear affects only the selected view and site; all-site clear is separate",
+      "result": "passed"
+    },
+    {
+      "name": "Records demo contains protected labels, safe comments, abuse and separate profanity-only warnings",
+      "result": "passed"
+    }
+  ],
+  "limitations": [
+    "Headless Brave, isolated temporary profile; no existing browser profile was accessed.",
+    "Temporary extension copy changes API port and grants only the demo origin for programmatic popup access (normal toolbar clicks grant activeTab).",
+    "Temporary instrumentation counts full discovery and delays real API responses; model outputs are not mocked.",
+    "Closed Shadow DOM is inspected through Chrome DevTools Protocol."
+  ],
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "concurrentSaves": {
+    "uniqueSaved": 50,
+    "duplicateAttempts": 20,
+    "duplicateRecordsCreated": 1
+  },
+  "finalStatus": {
+    "phase": "complete",
+    "scanned": 8,
+    "warnings": 1,
+    "insufficient": 0
+  },
+  "requestCount": 28,
+  "result": "passed"
+}

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>CyberShield local records demo</title>
+<style>
+body{max-width:880px;margin:32px auto;padding:16px;font:16px/1.6 system-ui;color:#182231}header{padding:16px;background:#edf3fa;border-radius:8px}section{margin:28px 0}section p{padding:12px;background:#f5f7fa;border-radius:6px}button{padding:8px;margin:4px}h2{font-size:20px}
+</style></head><body>
+<header><h1>CyberShield: decisions and local records</h1>
+<div>Run the local API and load the extension. Labels and unknown text should have insufficient information; profanity is separate from ML toxicity. Model errors are still possible.</div>
+<div>Open this page in two tabs. Save the same report in both tabs, rescan, then inspect Detections, Reports and Feedback in the popup. The same site/text/decision should appear once per view.</div>
+<div><strong>Saving a report does not notify this website.</strong> Incorrect predictions start unreviewed. Review toxicity and profanity independently; uncertain feedback is not a corrected training label.</div>
+<button id="duplicate">Add another copy of the brief insult</button><button id="neutralize">Edit the targeted insult to safe text</button></header>
+<section><h2>Harmless labels and unfamiliar text</h2><p>Home</p><p>Settings</p><p>Alice</p><p>Priya</p><p>qzxv blorf snazz</p></section>
+<section><h2>Safe comments</h2><p>Thank you for your help.</p><p>The meeting starts at noon.</p></section>
+<section id="abuse"><h2>Abusive comments</h2><p id="brief">You idiot</p><p id="targeted">You are a worthless idiot</p></section>
+<section><h2>Profanity without bullying</h2><p>shit</p><p>This is fucking great.</p></section>
+<script>
+document.getElementById('duplicate').onclick=()=>{const node=document.createElement('p');node.textContent=document.getElementById('brief').textContent;document.getElementById('abuse').append(node);};
+document.getElementById('neutralize').onclick=()=>{document.getElementById('targeted').textContent='Thank you for your help.';};
+</script></body></html>

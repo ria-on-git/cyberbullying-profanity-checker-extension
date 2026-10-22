@@ -1,0 +1,653 @@
+{
+  "dataset_sha256": "22ddd5eea0d10052ad0b9dccd6e8a1fafa47aa8843cac9bdc140bc0cdf98edee",
+  "seed": 42,
+  "versions": {
+    "python": "3.13.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "2.3.3"
+  },
+  "audit": {
+    "input_rows": 18148,
+    "source_labels": {
+      "-1": "toxic (1)",
+      "0": "non-toxic (0)"
+    },
+    "original_class_counts": {
+      "0": 6487,
+      "1": 11661
+    },
+    "exact_duplicate_extra_rows": 1080,
+    "equivalent_duplicate_extra_rows": 1121,
+    "conflicting_groups": 3,
+    "conflicting_rows": 9,
+    "empty_equivalent_rows": 2,
+    "retained_rows": 17023
+  },
+  "split_sizes": {
+    "train": 10213,
+    "validation": 3405,
+    "test": 3405
+  },
+  "best_params": {
+    "svc__C": 1.0
+  },
+  "cv_training_f1": 0.9298898657021124,
+  "threshold_selection": {
+    "source": "validation only",
+    "grid": "[-2, 3] step 0.025",
+    "objective": "Policy F0.5 relaxed, F1 balanced, F2 strict; abstentions count as no toxicity flag; relaxed >= balanced >= strict; ties prefer higher threshold",
+    "thresholds": {
+      "relaxed": 0.15,
+      "balanced": -0.15,
+      "strict": -0.4
+    }
+  },
+  "metric_notes": "Confusion rows true [non-toxic,toxic], columns predicted [negative,positive]. Abstentions count as negative in end-to-end metrics. Three-way columns [assessed negative,assessed positive,insufficient]. UI warning includes profanity and is not an abuse classification.",
+  "validation": {
+    "samples": 3405,
+    "class_counts": {
+      "0": 1295,
+      "1": 2110
+    },
+    "raw_svm_default_zero": {
+      "precision": 0.9391727493917275,
+      "recall": 0.9146919431279621,
+      "f1": 0.9267707082833133,
+      "confusion_matrix": [
+        [
+          1170,
+          125
+        ],
+        [
+          180,
+          1930
+        ]
+      ],
+      "safe_text_false_positives": 125,
+      "safe_text_count": 1295,
+      "safe_text_false_positive_rate": 0.09652509652509653
+    },
+    "insufficient_information": {
+      "total": 38,
+      "by_true_class": {
+        "0": 16,
+        "1": 22
+      }
+    },
+    "sensitivities": {
+      "relaxed": {
+        "threshold": 0.15,
+        "raw_classifier": {
+          "precision": 0.9564772145417306,
+          "recall": 0.885308056872038,
+          "f1": 0.9195175978341127,
+          "confusion_matrix": [
+            [
+              1210,
+              85
+            ],
+            [
+              242,
+              1868
+            ]
+          ],
+          "safe_text_false_positives": 85,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.06563706563706563
+        },
+        "policy_toxicity": {
+          "precision": 0.9570170895908856,
+          "recall": 0.875829383886256,
+          "f1": 0.9146250927988122,
+          "confusion_matrix": [
+            [
+              1212,
+              83
+            ],
+            [
+              262,
+              1848
+            ]
+          ],
+          "safe_text_false_positives": 83,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.06409266409266409
+        },
+        "policy_three_way_confusion": [
+          [
+            1196,
+            83,
+            16
+          ],
+          [
+            240,
+            1848,
+            22
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.9570170895908856,
+          "recall": 0.8850574712643678,
+          "f1": 0.9196317491913412,
+          "confusion_matrix": [
+            [
+              1196,
+              83
+            ],
+            [
+              240,
+              1848
+            ]
+          ],
+          "safe_text_false_positives": 83,
+          "safe_text_count": 1279,
+          "safe_text_false_positive_rate": 0.06489444878811572
+        },
+        "combined_ui_warning": {
+          "precision": 0.9525222551928784,
+          "recall": 0.9127962085308057,
+          "f1": 0.9322362052274927,
+          "confusion_matrix": [
+            [
+              1199,
+              96
+            ],
+            [
+              184,
+              1926
+            ]
+          ],
+          "safe_text_false_positives": 96,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.07413127413127413
+        }
+      },
+      "balanced": {
+        "threshold": -0.15,
+        "raw_classifier": {
+          "precision": 0.9174354243542435,
+          "recall": 0.942654028436019,
+          "f1": 0.9298737727910238,
+          "confusion_matrix": [
+            [
+              1116,
+              179
+            ],
+            [
+              121,
+              1989
+            ]
+          ],
+          "safe_text_false_positives": 179,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.13822393822393822
+        },
+        "policy_toxicity": {
+          "precision": 0.918338777414839,
+          "recall": 0.9327014218009478,
+          "f1": 0.9254643780860569,
+          "confusion_matrix": [
+            [
+              1120,
+              175
+            ],
+            [
+              142,
+              1968
+            ]
+          ],
+          "safe_text_false_positives": 175,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.13513513513513514
+        },
+        "policy_three_way_confusion": [
+          [
+            1104,
+            175,
+            16
+          ],
+          [
+            120,
+            1968,
+            22
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.918338777414839,
+          "recall": 0.9425287356321839,
+          "f1": 0.9302765303710707,
+          "confusion_matrix": [
+            [
+              1104,
+              175
+            ],
+            [
+              120,
+              1968
+            ]
+          ],
+          "safe_text_false_positives": 175,
+          "safe_text_count": 1279,
+          "safe_text_false_positive_rate": 0.13682564503518374
+        },
+        "combined_ui_warning": {
+          "precision": 0.916970802919708,
+          "recall": 0.95260663507109,
+          "f1": 0.9344490934449093,
+          "confusion_matrix": [
+            [
+              1113,
+              182
+            ],
+            [
+              100,
+              2010
+            ]
+          ],
+          "safe_text_false_positives": 182,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.14054054054054055
+        }
+      },
+      "strict": {
+        "threshold": -0.4,
+        "raw_classifier": {
+          "precision": 0.8537794299876085,
+          "recall": 0.9796208530805687,
+          "f1": 0.912381372765394,
+          "confusion_matrix": [
+            [
+              941,
+              354
+            ],
+            [
+              43,
+              2067
+            ]
+          ],
+          "safe_text_false_positives": 354,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.27335907335907333
+        },
+        "policy_toxicity": {
+          "precision": 0.8553511705685619,
+          "recall": 0.9696682464454977,
+          "f1": 0.9089293647267881,
+          "confusion_matrix": [
+            [
+              949,
+              346
+            ],
+            [
+              64,
+              2046
+            ]
+          ],
+          "safe_text_false_positives": 346,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.2671814671814672
+        },
+        "policy_three_way_confusion": [
+          [
+            933,
+            346,
+            16
+          ],
+          [
+            42,
+            2046,
+            22
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.8553511705685619,
+          "recall": 0.9798850574712644,
+          "f1": 0.9133928571428571,
+          "confusion_matrix": [
+            [
+              933,
+              346
+            ],
+            [
+              42,
+              2046
+            ]
+          ],
+          "safe_text_false_positives": 346,
+          "safe_text_count": 1279,
+          "safe_text_false_positive_rate": 0.2705238467552776
+        },
+        "combined_ui_warning": {
+          "precision": 0.8550124275062138,
+          "recall": 0.9781990521327014,
+          "f1": 0.9124668435013262,
+          "confusion_matrix": [
+            [
+              945,
+              350
+            ],
+            [
+              46,
+              2064
+            ]
+          ],
+          "safe_text_false_positives": 350,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.2702702702702703
+        }
+      }
+    },
+    "profanity_rule": {
+      "flag_count": 1167,
+      "by_toxicity_label": {
+        "0": 32,
+        "1": 1135
+      },
+      "note": "No profanity ground truth: toxicity labels cannot measure profanity accuracy."
+    }
+  },
+  "test": {
+    "samples": 3405,
+    "class_counts": {
+      "0": 1295,
+      "1": 2110
+    },
+    "raw_svm_default_zero": {
+      "precision": 0.9413179413179413,
+      "recall": 0.9274881516587677,
+      "f1": 0.934351873955598,
+      "confusion_matrix": [
+        [
+          1173,
+          122
+        ],
+        [
+          153,
+          1957
+        ]
+      ],
+      "safe_text_false_positives": 122,
+      "safe_text_count": 1295,
+      "safe_text_false_positive_rate": 0.09420849420849421
+    },
+    "insufficient_information": {
+      "total": 39,
+      "by_true_class": {
+        "0": 12,
+        "1": 27
+      }
+    },
+    "sensitivities": {
+      "relaxed": {
+        "threshold": 0.15,
+        "raw_classifier": {
+          "precision": 0.9550731953558809,
+          "recall": 0.8966824644549763,
+          "f1": 0.9249572231728184,
+          "confusion_matrix": [
+            [
+              1206,
+              89
+            ],
+            [
+              218,
+              1892
+            ]
+          ],
+          "safe_text_false_positives": 89,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.06872586872586872
+        },
+        "policy_toxicity": {
+          "precision": 0.9545454545454546,
+          "recall": 0.885781990521327,
+          "f1": 0.9188790560471977,
+          "confusion_matrix": [
+            [
+              1206,
+              89
+            ],
+            [
+              241,
+              1869
+            ]
+          ],
+          "safe_text_false_positives": 89,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.06872586872586872
+        },
+        "policy_three_way_confusion": [
+          [
+            1194,
+            89,
+            12
+          ],
+          [
+            214,
+            1869,
+            27
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.9545454545454546,
+          "recall": 0.8972635621699472,
+          "f1": 0.9250185597624351,
+          "confusion_matrix": [
+            [
+              1194,
+              89
+            ],
+            [
+              214,
+              1869
+            ]
+          ],
+          "safe_text_false_positives": 89,
+          "safe_text_count": 1283,
+          "safe_text_false_positive_rate": 0.06936866718628215
+        },
+        "combined_ui_warning": {
+          "precision": 0.9504901960784313,
+          "recall": 0.918957345971564,
+          "f1": 0.9344578313253012,
+          "confusion_matrix": [
+            [
+              1194,
+              101
+            ],
+            [
+              171,
+              1939
+            ]
+          ],
+          "safe_text_false_positives": 101,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.077992277992278
+        }
+      },
+      "balanced": {
+        "threshold": -0.15,
+        "raw_classifier": {
+          "precision": 0.9201468563561267,
+          "recall": 0.9502369668246445,
+          "f1": 0.9349498717649802,
+          "confusion_matrix": [
+            [
+              1121,
+              174
+            ],
+            [
+              105,
+              2005
+            ]
+          ],
+          "safe_text_false_positives": 174,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.13436293436293437
+        },
+        "policy_toxicity": {
+          "precision": 0.9200743494423792,
+          "recall": 0.9383886255924171,
+          "f1": 0.9291412482402628,
+          "confusion_matrix": [
+            [
+              1123,
+              172
+            ],
+            [
+              130,
+              1980
+            ]
+          ],
+          "safe_text_false_positives": 172,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.13281853281853281
+        },
+        "policy_three_way_confusion": [
+          [
+            1111,
+            172,
+            12
+          ],
+          [
+            103,
+            1980,
+            27
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.9200743494423792,
+          "recall": 0.9505520883341335,
+          "f1": 0.935064935064935,
+          "confusion_matrix": [
+            [
+              1111,
+              172
+            ],
+            [
+              103,
+              1980
+            ]
+          ],
+          "safe_text_false_positives": 172,
+          "safe_text_count": 1283,
+          "safe_text_false_positive_rate": 0.13406079501169135
+        },
+        "combined_ui_warning": {
+          "precision": 0.9178832116788321,
+          "recall": 0.9535545023696682,
+          "f1": 0.9353788935378894,
+          "confusion_matrix": [
+            [
+              1115,
+              180
+            ],
+            [
+              98,
+              2012
+            ]
+          ],
+          "safe_text_false_positives": 180,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.138996138996139
+        }
+      },
+      "strict": {
+        "threshold": -0.4,
+        "raw_classifier": {
+          "precision": 0.8602910602910603,
+          "recall": 0.9805687203791469,
+          "f1": 0.9165005537098561,
+          "confusion_matrix": [
+            [
+              959,
+              336
+            ],
+            [
+              41,
+              2069
+            ]
+          ],
+          "safe_text_false_positives": 336,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.2594594594594595
+        },
+        "policy_toxicity": {
+          "precision": 0.8601516427969671,
+          "recall": 0.9677725118483412,
+          "f1": 0.9107939339875112,
+          "confusion_matrix": [
+            [
+              963,
+              332
+            ],
+            [
+              68,
+              2042
+            ]
+          ],
+          "safe_text_false_positives": 332,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.25637065637065637
+        },
+        "policy_three_way_confusion": [
+          [
+            951,
+            332,
+            12
+          ],
+          [
+            41,
+            2042,
+            27
+          ]
+        ],
+        "policy_assessed_only": {
+          "precision": 0.8601516427969671,
+          "recall": 0.9803168506961114,
+          "f1": 0.9163114202378282,
+          "confusion_matrix": [
+            [
+              951,
+              332
+            ],
+            [
+              41,
+              2042
+            ]
+          ],
+          "safe_text_false_positives": 332,
+          "safe_text_count": 1283,
+          "safe_text_false_positive_rate": 0.2587685113016368
+        },
+        "combined_ui_warning": {
+          "precision": 0.8586365537432037,
+          "recall": 0.9729857819905213,
+          "f1": 0.9122417240613198,
+          "confusion_matrix": [
+            [
+              957,
+              338
+            ],
+            [
+              57,
+              2053
+            ]
+          ],
+          "safe_text_false_positives": 338,
+          "safe_text_count": 1295,
+          "safe_text_false_positive_rate": 0.261003861003861
+        }
+      }
+    },
+    "profanity_rule": {
+      "flag_count": 1171,
+      "by_toxicity_label": {
+        "0": 39,
+        "1": 1132
+      },
+      "note": "No profanity ground truth: toxicity labels cannot measure profanity accuracy."
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "Real Chromium extension regression harness; no mocked detection results",
+  "devDependencies": {"playwright-core": "1.56.1"}
+}

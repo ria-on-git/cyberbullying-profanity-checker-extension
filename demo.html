@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CyberShield dynamic scanner demo</title>
+  <style>
+    body { max-width: 860px; margin: 32px auto; padding: 16px; font: 16px/1.6 system-ui; }
+    .comment { padding: 12px; margin: 16px 0; background: #f0f4f8; }
+    button { padding: 8px; margin: 4px; }
+    .hidden-by-css { display: none; }
+    /* Deliberately hostile page rules: warning internals must stay isolated. */
+    .warning, .details { color: lime !important; display: block !important; font-size: 50px !important; }
+    #styled { outline: 1px dashed purple !important; outline-offset: 5px !important; }
+  </style>
+</head>
+<body>
+  <h1>Dynamic comments</h1>
+  <div>Load the unpacked extension and run the local Flask API. Use the popup to change sensitivity or disable protection.</div>
+  <div id="controls">
+    <button id="add">Add insult</button>
+    <button id="edit">Edit insult to neutral</button>
+    <button id="remove">Remove insult</button>
+    <button id="hide">Toggle hidden comment</button>
+  </div>
+  <section id="comments">
+    <p id="neutral" class="comment">Thank you for your help.</p>
+    <p id="styled" class="comment">You are a stupid idiot and nobody likes you.</p>
+    <p id="profanity" class="comment">This is fucking great.</p>
+    <p id="borderline" class="comment">Have a wonderful day</p>
+    <p id="name" class="comment">Alice</p>
+    <article id="nested"><p id="nested-comment">You idiot</p></article>
+    <div id="hidden-container" hidden><p id="hidden-comment" class="comment">You are a stupid idiot.</p></div>
+    <p class="hidden-by-css">You are a stupid idiot.</p>
+    <div style="opacity:0"><p>You are a stupid idiot.</p></div>
+  </section>
+  <nav><p>You are a stupid idiot in navigation.</p></nav>
+  <div role="navigation"><p>You are a stupid idiot in role navigation.</p></div>
+  <form><p>You are a stupid idiot in a form.</p><input value="you idiot"><textarea>You idiot</textarea></form>
+  <div contenteditable="true"><p>You are a stupid idiot in an editor.</p></div>
+  <div data-cybershield-ui><p>You are a stupid idiot in extension UI.</p></div>
+  <p id="mixed">Thank you <span hidden>you stupid idiot</span><button>you idiot</button> for your help.</p>
+  <script>
+    document.getElementById('add').onclick = () => {
+      const comment = document.createElement('p');
+      comment.className = 'comment';
+      comment.dataset.dynamic = 'true';
+      comment.textContent = 'You are a worthless idiot';
+      document.getElementById('comments').append(comment);
+    };
+    document.getElementById('edit').onclick = () => {
+      const comment = document.querySelector('[data-dynamic]') || document.getElementById('styled');
+      if (comment) comment.textContent = 'Thank you for your help';
+    };
+    document.getElementById('remove').onclick = () => {
+      const comment = document.querySelector('[data-dynamic]') || document.getElementById('styled');
+      comment?.remove();
+    };
+    document.getElementById('hide').onclick = () => {
+      const container = document.getElementById('hidden-container');
+      container.hidden = !container.hidden;
+    };
+  </script>
+</body>
+</html>

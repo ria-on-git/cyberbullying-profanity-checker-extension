@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-22T16:31:10.750Z",
+  "kind": "feedback",
+  "site": "http://127.0.0.1:8766",
+  "reviewedOnly": false,
+  "notice": "Local records only. Reports do not notify websites. Feedback labels are explicit human review, never inferred by flipping a prediction. No automatic training.",
+  "records": [
+    {
+      "id": "44a530f9e198e38e082bef168bfb06bc6880baf2d5cdd44a658d14167eadf907",
+      "site": "http://127.0.0.1:8766",
+      "text": "Second unreviewed fixture",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": -0.2263120672941507,
+        "threshold": -0.4,
+        "sensitivity": "strict",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:31:10.615Z",
+      "kind": "feedback",
+      "key": "feedback:44a530f9e198e38e082bef168bfb06bc6880baf2d5cdd44a658d14167eadf907",
+      "sequence": 64,
+      "review": {
+        "status": "unreviewed",
+        "toxicityLabel": null,
+        "profanityLabel": null,
+        "notes": "",
+        "reviewedAt": null
+      }
+    },
+    {
+      "id": "a3d9eca4bd017df0f485c2d1ae59e33d0decee905a11499986930b4a207929e8",
+      "site": "http://127.0.0.1:8766",
+      "text": "Have a wonderful day",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": -0.2263120672941507,
+        "threshold": -0.4,
+        "sensitivity": "strict",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:31:10.451Z",
+      "kind": "feedback",
+      "key": "feedback:a3d9eca4bd017df0f485c2d1ae59e33d0decee905a11499986930b4a207929e8",
+      "sequence": 62,
+      "review": {
+        "status": "reviewed",
+        "toxicityLabel": "uncertain",
+        "profanityLabel": "absent",
+        "notes": "Human review: context is missing",
+        "reviewedAt": "2026-10-22T16:31:10.610Z"
+      }
+    }
+  ]
+}

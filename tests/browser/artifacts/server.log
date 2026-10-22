@@ -1,0 +1,46 @@
+ * Serving Flask app 'backend.app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5002
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [22/Oct/2026 22:00:59] "GET /health HTTP/1.1" 200 -
+Serving HTTP on 127.0.0.1 port 8766 (http://127.0.0.1:8766/) ...
+127.0.0.1 - - [22/Oct/2026 22:00:59] "GET /demo.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:00:59] "GET /demo.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:00:59] code 404, message File not found
+127.0.0.1 - - [22/Oct/2026 22:00:59] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [22/Oct/2026 22:00:59] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:00] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:00] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:00] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:00] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:00] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:01] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:03] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:03] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:03] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:03] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:03] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:04] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:05] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:06] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:06] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:08] "POST /predict HTTP/1.1" 200 -
+ * Serving Flask app 'backend.app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5002
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [22/Oct/2026 22:01:09] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:09] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:10] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:10] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:11] "GET /records-demo.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:11] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:11] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 22:01:11] "POST /predict HTTP/1.1" 200 -

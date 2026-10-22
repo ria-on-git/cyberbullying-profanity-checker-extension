@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-22T16:31:10.622Z",
+  "kind": "detections",
+  "site": "http://127.0.0.1:8766",
+  "reviewedOnly": false,
+  "notice": "Local records only. Reports do not notify websites. Feedback labels are explicit human review, never inferred by flipping a prediction. No automatic training.",
+  "records": [
+    {
+      "id": "a3d9eca4bd017df0f485c2d1ae59e33d0decee905a11499986930b4a207929e8",
+      "site": "http://127.0.0.1:8766",
+      "text": "Have a wonderful day",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": -0.2263120672941507,
+        "threshold": -0.4,
+        "sensitivity": "strict",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:31:01.715Z",
+      "kind": "detections",
+      "key": "detections:a3d9eca4bd017df0f485c2d1ae59e33d0decee905a11499986930b4a207929e8",
+      "sequence": 10
+    },
+    {
+      "id": "db184a4c3ef41fa34979ca55129062d789f69b24f9d8043e1d588699cf315595",
+      "site": "http://127.0.0.1:8766",
+      "text": "You are a stupid idiot.",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": 2.342845333459459,
+        "threshold": -0.15,
+        "sensitivity": "balanced",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:31:00.890Z",
+      "kind": "detections",
+      "key": "detections:db184a4c3ef41fa34979ca55129062d789f69b24f9d8043e1d588699cf315595",
+      "sequence": 9
+    },
+    {
+      "id": "fdfb3a2e7f423acfade57e7b560355d62a769f1f9f19a615d5df22a2dcbf0eeb",
+      "site": "http://127.0.0.1:8766",
+      "text": "You are a worthless idiot",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": 1.4692052789891077,
+        "threshold": -0.15,
+        "sensitivity": "balanced",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:31:00.154Z",
+      "kind": "detections",
+      "key": "detections:fdfb3a2e7f423acfade57e7b560355d62a769f1f9f19a615d5df22a2dcbf0eeb",
+      "sequence": 8
+    },
+    {
+      "id": "4f978b36ff99fa873544fe1bec0bed5c71c233acffb77d4054ce3a7b2e1c41ca",
+      "site": "http://127.0.0.1:8766",
+      "text": "You idiot",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": 1.9792446648636657,
+        "threshold": -0.15,
+        "sensitivity": "balanced",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:30:59.628Z",
+      "kind": "detections",
+      "key": "detections:4f978b36ff99fa873544fe1bec0bed5c71c233acffb77d4054ce3a7b2e1c41ca",
+      "sequence": 7
+    },
+    {
+      "id": "45ece67206028181df4a55ae02e73c95fe585da99e85b54113bfb52e7f1069e3",
+      "site": "http://127.0.0.1:8766",
+      "text": "This is fucking great.",
+      "prediction": {
+        "toxic": false,
+        "profanity": true,
+        "matched_terms": [
+          "fucking"
+        ],
+        "assessment": "not_flagged",
+        "reason": "Profanity term detected (not proof of bullying)",
+        "margin": -0.9336055368784568,
+        "threshold": -0.15,
+        "sensitivity": "balanced",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:30:59.628Z",
+      "kind": "detections",
+      "key": "detections:45ece67206028181df4a55ae02e73c95fe585da99e85b54113bfb52e7f1069e3",
+      "sequence": 6
+    },
+    {
+      "id": "d78a6e543b77ce6b05a9e85323092d7015eef6e9a5e81db4107081756b5dbcff",
+      "site": "http://127.0.0.1:8766",
+      "text": "You are a stupid idiot and nobody likes you.",
+      "prediction": {
+        "toxic": true,
+        "profanity": false,
+        "matched_terms": [],
+        "assessment": "potential_abuse",
+        "reason": "Potential abusive language (ML screening)",
+        "margin": 1.999770461244837,
+        "threshold": -0.15,
+        "sensitivity": "balanced",
+        "ml_eligible": true,
+        "policy_version": 2
+      },
+      "createdAt": "2026-10-22T16:30:59.627Z",
+      "kind": "detections",
+      "key": "detections:d78a6e543b77ce6b05a9e85323092d7015eef6e9a5e81db4107081756b5dbcff",
+      "sequence": 5
+    }
+  ]
+}

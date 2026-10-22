@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="popup.css"><title>CyberShield local records</title></head><body>
+<header><h2>CyberShield AI</h2><span id="site"></span></header><p id="status" role="status" aria-live="polite">Checking scanner…</p>
+<div class="scan-settings"><label><input id="enabled" type="checkbox" checked disabled> Scan this site</label>
+<label>Sensitivity <select id="sensitivity" disabled><option value="balanced">Balanced</option><option value="strict">Strict</option><option value="relaxed">Relaxed</option></select></label></div>
+<button id="scan" disabled>Scan current page</button>
+<div class="views" role="group" aria-label="Local record views">
+  <button data-view="detections" aria-pressed="true">Detections</button>
+  <button data-view="reports" aria-pressed="false">Reports</button>
+  <button data-view="feedback" aria-pressed="false">Feedback</button>
+</div>
+<label>Record scope <select id="scope"><option value="site">Current site</option><option value="all">All sites</option></select></label>
+<p id="counts"></p>
+<div class="tools"><button id="export">Export this view</button><button id="export-reviewed" hidden>Export reviewed feedback</button><button id="clear">Clear detections (this site)</button></div>
+<p id="record-status" role="status" aria-live="polite"></p>
+<div id="items" aria-label="Saved local records"></div>
+<small>Saving a report does not notify the website. Records stay in this browser profile until you export them. Incorrect predictions start unreviewed; labels are never automatically flipped and feedback never automatically retrains the model.</small>
+<script src="popup.js"></script></body></html>
