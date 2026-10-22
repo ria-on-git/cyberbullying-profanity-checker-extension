@@ -1,137 +1,358 @@
-# CyberShield AI — local screening and reviewed feedback
+# CyberShield AI — Cyberbullying & Profanity Screening Extension
 
-CyberShield scans suitable visible webpage text with **word + character TF-IDF + LinearSVC** and a separate complete-token profanity rule. It highlights potential toxicity or profanity and keeps detections, local reports, and incorrect-prediction feedback in your browser profile. A result is screening evidence, not proof of bullying. **Saving a report does not notify the website or its moderators.**
+CyberShield AI is a browser extension with a local Flask API that screens visible webpage text for **potentially abusive language** and **profanity**. It can highlight suspicious text and save local detections, reports, and user-reviewed feedback.
 
-The supplied dataset is `ml/dataset.csv`: `headline` is text, label `-1` means toxic and `0` means non-toxic. The original project/dataset are credited to [Chando0185](https://github.com/Chando0185); check the upstream license before redistribution.
+> **Important:** A flag is a screening result, not proof that bullying occurred. Profanity and targeted abuse are separate signals. Reports are stored locally in the browser; saving one does not notify the website or its moderators.
 
-## Setup and first run
+## Contents
 
-Use Python with the packages in `backend/requirements.txt` and a Chromium browser supporting Manifest V3. The recorded Python checks used Python 3.13.14 and scikit-learn 1.9.1. npm is needed only for the optional browser test harness, not for running the extension.
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [How detection works](#how-detection-works)
+- [Dataset and labels](#dataset-and-labels)
+- [Training methodology](#training-methodology)
+- [Evaluation](#evaluation)
+- [Requirements](#requirements)
+- [Run locally on Windows](#run-locally-on-windows)
+- [Load the extension in Chrome](#load-the-extension-in-chrome)
+- [Run the demo pages](#run-the-demo-pages)
+- [Test the API](#test-the-api)
+- [Retraining the model](#retraining-the-model)
+- [Feedback and data handling](#feedback-and-data-handling)
+- [Limitations](#limitations)
+- [Project structure](#project-structure)
+- [Credits](#credits)
+
+## Features
+
+- Scans supported visible webpage text manually and as supported page content changes.
+- Uses a machine-learning classifier to screen text for potential toxicity.
+- Runs a separate profanity check; swearing is not automatically treated as bullying.
+- Offers Relaxed, Balanced, and Strict screening sensitivity settings.
+- Shows warnings and explanatory details for detections.
+- Stores detections, reports, and reviewed/unreviewed feedback locally in the browser profile.
+- Exports records as JSON for later review.
+- Includes demo pages and tests for scanner behavior and decision-policy checks.
+- Runs model inference locally through Flask. Text is sent to the local API at `127.0.0.1`, not a hosted prediction service.
+
+## Tech stack
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Browser extension | JavaScript, HTML, CSS | Popup, page scanning, highlights, settings and records UI |
+| Extension manifest | Chrome Manifest V3 | Permissions, popup, content script and background service worker |
+| Backend API | Python, Flask | Local `/health` and `/predict` endpoints |
+| Text features | scikit-learn TF-IDF | Converts text into word- and character-level numeric features |
+| Toxicity classifier | LinearSVC | Scores text for potentially toxic language |
+| Profanity rules | Python regular expressions and token matching | Detects a maintained list of profanity separately from ML |
+| Model persistence | joblib | Saves and loads the fitted scikit-learn pipeline |
+| Record storage | IndexedDB and `chrome.storage.local` | Stores extension records and settings in the browser |
+| Tests | Python `unittest`, Node.js browser test harness | Tests policy, evaluation and scanner behavior |
+
+## How detection works
+
+### 1. Webpage text collection
+
+The content script (`extension/content.js`) looks for supported visible text blocks. It avoids areas such as editable fields and navigation, and handles supported content that is added, edited or removed. It cannot scan every page or every type of embedded content.
+
+### 2. Local API request
+
+The extension background service worker (`extension/background.js`) sends text to Flask:
+
+```http
+POST http://127.0.0.1:5000/predict
+Content-Type: application/json
+```
+
+Example request:
+
+```json
+{
+  "texts": ["You are an idiot and nobody likes you"],
+  "sensitivity": "balanced"
+}
+```
+
+The API accepts a `texts` array (up to 50 strings per request, each up to 2,000 characters).
+
+### 3. Toxicity screening: TF-IDF + LinearSVC
+
+The trained pipeline uses two text representations:
+
+- **Word TF-IDF, word n-grams 1–2:** represents individual words and adjacent two-word sequences.
+- **Character-within-word TF-IDF, n-grams 2–5:** captures character patterns and can help with spelling variations.
+- **LinearSVC:** learns a separating boundary between toxic and non-toxic training examples and returns a signed decision margin. The margin is **not a probability**.
+
+The detector also applies an eligibility gate. Empty/unrecognised text and very short neutral labels can return `insufficient_information` instead of forcing a toxicity classification. Certain short insult/threat cues allow short text to be assessed. Explicit threat phrases such as “kill yourself” and “go die” receive a threshold cap.
+
+### 4. Separate profanity rules
+
+Profanity is not determined solely by the classifier. A separate rule-based check:
+
+- Matches complete tokens rather than arbitrary substrings.
+- Applies limited normalization for masked spellings (for example, `f*ck`) and repeated letters (for example, `fuuuck`).
+- Includes selected common English profanity and romanised Hindi/Hinglish abuse terms.
+- Reports matched terms separately from the ML toxicity decision.
+
+A profanity-only result is not, by itself, proof of targeted abuse. The profanity list is rule-based and is not a separately trained model.
+
+### 5. Sensitivity thresholds
+
+The supplied model artifact stores these operating thresholds:
+
+| Setting | Threshold | Intended trade-off |
+|---|---:|---|
+| Relaxed | `0.275` | Fewer false alarms; may miss more abusive examples |
+| Balanced | `-0.200` | General balance between precision and recall |
+| Strict | `-0.425` | More sensitive; may flag more harmless text |
+
+These thresholds were selected using validation data, not the final test split. Lower thresholds generally make it easier to flag text. LinearSVC margins are not confidence percentages.
+
+## Dataset and labels
+
+The main training file is **`ml/dataset.csv`**. It contains two columns:
+
+| Column | Meaning |
+|---|---|
+| `headline` | Text example used as model input |
+| `label` | Source class: `-1` means toxic; `0` means non-toxic |
+
+The training script maps source `-1` → toxic target `1`, and source `0` → non-toxic target `0`.
+
+The bundled CSV has **18,148 rows** before cleaning: **11,661 toxic** and **6,487 non-toxic** examples. The original project/dataset are credited to [Chando0185](https://github.com/Chando0185). Check the upstream repository's license and attribution requirements before redistribution or reuse.
+
+### Dataset cleaning
+
+`ml/train_model.py` audits and normalizes examples before splitting:
+
+1. Normalizes text for equivalence checking.
+2. Removes duplicate/equivalent repetitions so the same normalized text does not leak between splits.
+3. Excludes groups with conflicting labels rather than guessing a correct label.
+4. Excludes empty-equivalent rows.
+5. Keeps one representative per remaining equivalent-text group.
+
+For the bundled training run, this leaves **17,023 retained examples**. The script records the audit, dataset SHA-256, software versions, split sizes and hashes of normalized examples in `backend/model/metrics.json` and `backend/model/split_manifest.json`.
+
+### Adding more labelled data
+
+Additional CSVs can be placed in `ml/extra/`. The training script supports extra datasets with `text,label` columns, where `1` means toxic and `0` means non-toxic. See [`ml/extra/README.md`](ml/extra/README.md). Specific files can be passed to the trainer with `--extra`.
+
+Only add examples with reviewed, reliable labels. Do not treat an extension user's “Incorrect” click as an automatic opposite label.
+
+## Training methodology
+
+Training code: **`ml/train_model.py`**  
+Optional Colab workflow: **`ml/train_on_colab.ipynb`**
+
+The supplied pipeline was trained with this procedure:
+
+1. **Prepare and audit data:** normalize examples, deduplicate equivalent text, exclude conflicting labels and empty text.
+2. **Split data:** stratified, disjoint **60% train / 20% validation / 20% test** splits with random seed `42`.
+3. **Fit TF-IDF correctly:** vocabulary and IDF are learned inside training folds during cross-validation and then from the training split only; validation/test text is not used to fit the vectorizer.
+4. **Tune SVM regularization:** three-fold stratified cross-validation selects `svc__C` using F1. The supplied run selected `C = 1.0`.
+5. **Select sensitivity thresholds:** validation data selects Relaxed, Balanced and Strict thresholds according to F0.5, F1 and F2 objectives respectively, with ordering constraints.
+6. **Evaluate:** after fitting and policy selection, the held-out test split is evaluated and the results saved.
+7. **Save artifacts:** the fitted pipeline is stored as `backend/model/toxicity_pipeline.joblib`; evaluation details and split hashes are saved beside it.
+
+| Split | Examples |
+|---|---:|
+| Training | 10,213 |
+| Validation | 3,405 |
+| Test | 3,405 |
+| **Total retained** | **17,023** |
+
+The final test set has been used in the project's development/evaluation history to compare earlier versions, so it should not be presented as a completely new independent external benchmark.
+
+## Evaluation
+
+Detailed report: [`ml/EVALUATION.md`](ml/EVALUATION.md)  
+Machine-readable metrics: [`backend/model/metrics.json`](backend/model/metrics.json)
+
+On the supplied 3,405-example test split, the full toxicity policy at **Balanced** sensitivity reported:
+
+| Metric | Result |
+|---|---:|
+| Precision | 0.9225 |
+| Recall | 0.9483 |
+| F1 score | 0.9353 |
+| Non-toxic examples incorrectly flagged by toxicity policy | 168 / 1,295 |
+| Non-toxic false-positive rate | 12.97% |
+
+These results describe this dataset and split; they are not a guarantee of performance on arbitrary live websites. The combined UI warning can also be triggered by the separate profanity rule, so combined warnings should not be interpreted as toxicity-classifier accuracy. The project does not include an independent labelled profanity test set, so profanity precision/recall has not been established.
+
+## Requirements
+
+- Windows, macOS or Linux
+- Python 3.10+ recommended; the recorded training run used Python 3.13.14
+- Chromium-based browser with Manifest V3 support (Chrome/Edge)
+- Python packages listed in `backend/requirements.txt`
+- Node.js/npm only if you want to run the optional browser test harness
+
+The saved scikit-learn model may require a compatible scikit-learn version. If loading the model fails, create a clean environment and retrain using your installed versions, or install the compatible version recorded in `backend/model/metrics.json`.
+
+## Run locally on Windows
+
+### 1. Extract the project
+
+Extract the ZIP to a folder, for example:
+
+```text
+E:\cyberbullying-profanity-checker-extension\
+```
+
+Open Command Prompt in that folder. The project root should contain `backend`, `extension`, `ml`, `tests`, and `README.md`.
+
+### 2. Create a virtual environment and install dependencies
+
+```bat
+py -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -r backend\requirements.txt
+```
+
+If `py` is unavailable, try `python` instead.
+
+### 3. Start Flask
 
 From the project root:
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r backend/requirements.txt
-python backend/app.py
+```bat
+python backend\app.py
 ```
 
-On Windows, activate with `.venv\Scripts\activate`. Check `http://127.0.0.1:5000/health`. If the model is missing or incompatible with your installed scikit-learn version, train it first with `python ml/train_model.py`, then start the API. Load only trusted joblib artifacts.
+Keep this terminal open. The API binds to `127.0.0.1:5000`.
 
-In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the `extension` directory. Reload pages already open. Keep the local API running during scanning.
+Open **http://127.0.0.1:5000/health** to verify the backend. Expected response resembles:
 
-For the demonstration, open another terminal in the project root:
-
-```bash
-.venv/bin/python -m http.server 8765 --bind 127.0.0.1
+```json
+{
+  "model": "TF-IDF (word+char) + LinearSVC",
+  "status": "ok"
+}
 ```
 
-Open **http://127.0.0.1:8765/records-demo.html**. It contains harmless labels and names, unfamiliar vocabulary, safe comments, brief and targeted insults, and profanity without bullying. Its buttons duplicate and edit comments. Open two copies to try simultaneous local saves. `demo.html` provides additional dynamic scanner checks: add, edit, remove, hide/show, nested text, excluded forms/navigation/editors, and deliberately hostile page CSS.
+If the model file is missing or cannot be loaded, train it first as described under [Retraining the model](#retraining-the-model).
 
-## Scanning and decisions
+### 4. Load the extension in Chrome
 
-- The API owns sensitivity decisions; the extension displays the returned decision rather than applying another margin threshold. The supplied retrained artifact uses Relaxed `0.275`, Balanced `-0.2`, Strict `-0.425`. Explicit threat phrases ("kill yourself", "go die") cap their effective threshold at `0.0`, and the returned `threshold` reflects that. Thresholds were selected on validation data: Relaxed favours precision (F0.5), Balanced balances precision/recall (F1), Strict favours recall (F2). An SVM margin is **not a probability**.
-- Empty TF-IDF vectors and insufficient recognised text return `insufficient_information`, not an abuse classification. Short neutral labels cannot be classified from the SVM score alone. Brief insult/threat cues permit short messages to be assessed by the SVM; coverage is limited.
-- Profanity is a separate result, matched as complete Unicode word tokens after limited leetspeak normalization, masked spellings (`f*ck`, `sh*t`) and stretched letters (`fuuuck`). The list includes some common romanised Hindi terms; the ML model only judges Hinglish context if you train it on Hinglish data. A profanity-only warning does not establish bullying. The ML classifier can still make contextual errors on casual profanity or quotations.
-- The scanner queues affected visible leaf blocks, avoids forms, editable fields, navigation, hidden text, and its own UI, and handles added/edited/removed content. Full discovery occurs on initial/manual scans or settings changes; mutations inspect affected subtrees. Old responses cannot reapply warnings after edits or disabling. Original outline values/priorities are restored without overwriting subsequent page changes.
-- Warnings use closed Shadow DOM. **Why?** shows the actual ML assessment, sensitivity/threshold, margin, and separate profanity terms. **Report** saves a local record. **Incorrect** saves unreviewed feedback and dismisses that warning. **Ignore** dismisses the warning without feedback.
-- The popup distinguishes scanning, completion, no detections, disabled protection, and API unavailable. Sensitivity changes reevaluate existing text. Current warning counts and stored record counts are separate.
+1. Open `chrome://extensions/`.
+2. Enable **Developer mode**.
+3. Click **Load unpacked**.
+4. Select the project's **`extension`** folder (not the project root).
+5. Keep Flask running and refresh webpages that were already open.
+6. Visit a normal `http://` or `https://` webpage and click the extension icon to scan.
 
-## Local detections, reports, and feedback
+The popup intentionally disables scanning on unsupported URL schemes such as `file://`, browser-internal pages and extension pages. For local demo HTML files, use the local HTTP server instructions below rather than opening the file directly.
 
-The popup has three independent views:
+### 5. Run the demo pages over HTTP
 
-| View | What is saved | Actions |
-| --- | --- | --- |
-| Detections | Automatically saved warning snippets and original prediction snapshots | Save local report; mark incorrect; export; clear |
-| Reports | Snippets explicitly saved with Report, including their prediction snapshot | Mark incorrect; export; clear |
-| Feedback | Predictions explicitly contested with Incorrect/Mark prediction incorrect | Review; export all; export reviewed only; clear |
+Open a **second** Command Prompt in the project root and run:
 
-Choose **Current site** or **All sites**. Export and clear apply only to the selected view and scope. Clearing detections preserves reports and feedback; clearing reports preserves detections and feedback. Feedback has its own clear control. Local records remain accessible with All sites even on browser pages that cannot be scanned.
-
-All writes go through the extension service worker into **IndexedDB transactions**. Concurrent saves from tabs/popups cannot overwrite another record through a read/modify/write race. Each view deduplicates by SHA-256 of site origin, Unicode/whitespace-normalized snippet, and toxicity/profanity decision. Rescans, repeated clicks and different tabs share one record when those fields match. Different decisions remain separate. Margin, timestamp and sensitivity alone do not create another record; the first saved prediction snapshot is retained. This is a record identity, not a count of how often abuse occurred.
-
-Each view retains at most **200 unique records across all sites**. New unique saves evict the oldest committed record in that view. Text is limited to 2,000 characters (the scanner submits blocks up to 1,000), review notes to 1,000, and prediction fields are bounded. Reviewed feedback is also subject to retention: export it before it is evicted. Exports already downloaded are not deleted by clearing extension data.
-
-Valid legacy `chrome.storage.local` history/reports/feedback arrays migrate once, with duplicate merging, into IndexedDB. Old arrays are removed only after the migration commits. Settings stay in `chrome.storage.local`. Legacy feedback starts unreviewed; missing historical decisions remain unknown. Malformed legacy records are skipped rather than invented. A cleared migrated record is not reimported on restart.
-
-## Reviewing feedback and later dataset improvement
-
-**Incorrect is a dispute, not an opposite label.** New feedback has `status: unreviewed`, `toxicityLabel: null`, and `profanityLabel: null`. The original model prediction is preserved.
-
-In Feedback, choose human toxicity `Toxic`, `Non-toxic`, `Uncertain`, or leave it `Unlabelled`. Independently choose profanity `Present`, `Absent`, `Uncertain`, or `Unlabelled`. Add notes, tick **Reviewed by me**, and **Save review**. Unsaved draft notes are preserved during incoming record refreshes, but close the popup only after saving if you want them persisted. Two reviewers editing the same record use the last committed review; there is no review-history or merge workflow.
-
-**Export this view** downloads JSON for the selected scope, including unreviewed records. **Export reviewed feedback** includes only explicitly reviewed records; it does not require or manufacture a binary toxicity label. Export schema version 1 includes the site/snippet, original `prediction`, explicit `review` fields, creation/review timestamps, and record identities.
-
-For later improvement, a human must inspect reviewed exports, resolve ambiguous/context-dependent cases, and decide whether the text belongs in this dataset. Only reviewed examples explicitly labelled `toxic` or `non_toxic` are candidates for toxicity training (`-1` and `0` respectively in `ml/dataset.csv`). Null or `uncertain` labels must not be converted to an opposite class. Profanity labels are independent and must not be substituted for toxicity labels. Reconcile duplicates and label conflicts before adding any examples. **There is no automatic feedback import, label flipping, or retraining.** Export files are never read by the API or trainer unless you manually curate the source dataset.
-
-## Adding datasets and training on Colab
-
-Extra labelled data improves accuracy more than any algorithm change. Put CSVs with `text,label` columns (`1` toxic, `0` non-toxic) in `ml/extra/`; `python ml/train_model.py` merges them with `ml/dataset.csv`, deduplicates, splits and retrains (see `ml/extra/README.md`). Pass specific files with `--extra a.csv b.csv`.
-
-For large datasets use `ml/train_on_colab.ipynb`: upload the project zip, add datasets with the `add_dataset` helper, train, then download `backend/model/` and copy it over the local `backend/model/`. The local scikit-learn version must match the one used for training (`pip install scikit-learn==<version>`), or retrain locally. Restart the API after replacing the model.
-
-## Retraining and evaluation
-
-Stop/restart the API around a model replacement. From the project root:
-
-```bash
-.venv/bin/python ml/train_model.py
-.venv/bin/python backend/app.py
+```bat
+python -m http.server 8000 --bind 127.0.0.1
 ```
 
-Training collapses model-equivalent duplicates, excludes conflicting labels and empty text, and creates disjoint stratified 60/20/20 training/validation/test splits. TF-IDF is fitted only in training CV folds and the training split. C is selected in training CV; sensitivity thresholds are selected on validation. The final test is evaluated after selection. The pipeline, thresholds, `metrics.json`, and hashed `split_manifest.json` are saved under `backend/model/`.
+Then open:
 
-See [measured evaluation results and methodology](ml/EVALUATION.md) for raw SVM vs complete policy precision, recall, F1, confusion matrices, abstentions, and safe-text false positives. Profanity and combined UI-warning results are distinguished from ML toxicity. Strict has substantially more false positives; Balanced does not outperform default raw SVM test F1. These results do not guarantee website accuracy. Rerunning on the same data reuses the same test split, not a new independent benchmark.
+- **http://127.0.0.1:8000/demo.html** — dynamic scanner demo.
+- **http://127.0.0.1:8000/records-demo.html** — records/detection demo.
 
-After modifying the dataset, assess new evaluation results rather than retaining historical accuracy claims. Keep a separate external evaluation set if the original test has influenced development. Browser/model checks expose known errors, including positive expletive use and neutral sentences flagged at Strict.
+Keep both terminals open: Flask on port 5000 and the static demo server on port 8000. Stop a server with `Ctrl+C`.
 
-## Reload after changes
+## Test the API
 
-1. After changing extension files, click **Reload** on the extension card in `chrome://extensions`.
-2. Reload all open webpages using it; old content-script contexts do not upgrade automatically.
-3. After changing Python code or replacing the model, stop the previous Flask process and restart `python backend/app.py` in the active environment.
-4. Check `/health` and try **Scan current page**. Old API responses without the decision fields are rejected rather than displayed as contradictory warnings.
+In a second Command Prompt, send a prediction request:
 
-Reloading the same unpacked extension preserves IndexedDB records. Uninstalling it, clearing extension/site data, or using another profile can remove or separate them. Moving the unpacked extension folder can change its identity: export first.
-
-## Tests and saved evidence
-
-Python checks for the current model (word+char, v2): **13 passed, one documented expected failure** (casual profanity such as "This shit is amazing" scored as toxic). The 22-scenario browser harness result recorded under `tests/browser/artifacts/` was produced with the original v1 model and has **not been re-run** for v2; no extension JavaScript changed. Re-run it with the commands below on a machine with a compatible Chromium. Model-behaviour tests can legitimately fail after you add datasets; review the new model before changing a test.
-
-Python regression checks:
-
-```bash
-.venv/bin/python -m unittest discover -s tests -v
+```bat
+curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d "{\"texts\":[\"You are an idiot and nobody likes you\"],\"sensitivity\":\"balanced\"}"
 ```
 
-Real browser tests (install the pinned test-only dependency once):
+The response contains a `results` array with fields such as `flagged`, `toxic`, `profanity`, `matched_terms`, `assessment`, `margin`, `threshold` and `reason`.
 
-```bash
-npm install --prefix tests/browser --no-audit --no-fund
-node tests/browser_scanner.cjs
+Test the separate profanity rule:
+
+```bat
+curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d "{\"texts\":[\"This is fucking bullshit\"],\"sensitivity\":\"balanced\"}"
 ```
 
-The harness defaults to installed macOS Brave because it permits unpacked extensions in headless mode. Override `BROWSER_EXECUTABLE` for a compatible Chromium executable. It starts isolated demo/API servers on ports 8766/5002, uses a temporary profile and extension copy, and leaves existing servers alone. It tests the actual toolbar popup and actual JSON downloads; synthetic storage fixtures test concurrency and retention, while scanner tests use real model responses. See [browser test instructions](tests/browser/README.md) for details, overrides and scope. [Machine-readable results](tests/browser/artifacts/results.json), screenshots, example exports, and server logs are saved in `tests/browser/artifacts/`.
+Inspect `profanity` and `matched_terms` separately from `toxic`. A profanity warning is not necessarily a toxicity classification.
 
-## Privacy and limitations
+## Retraining the model
 
-Snippets are sent only to the local Flask service at `127.0.0.1:5000`. Records, reviews and settings remain in the current browser profile; they are not synchronized to an account or sent to websites, moderators, or a cloud training service. Stored records contain site origins, text, predictions, timestamps and optional human notes; they do not store full page URLs. A browser JSON download is the only export operation. Export files contain those snippets/notes and must be managed separately from extension storage. Local storage is not application-encrypted or a backup.
+From the project root, with the virtual environment activated:
 
-Chrome broad content-script access enables automatic scanning; inspect `extension/manifest.json`. Chrome internal pages, iframes, website-owned Shadow DOM, canvas text, media-query-only visibility changes, and text blocks longer than 1,000 characters are outside scanner coverage. Dataset bias, unfamiliar slang, quotations, sarcasm and lack of context remain limitations. The short-text gate misses some brief insults; profanity rules miss some obfuscations. No automatic moderation action is taken.
+```bat
+python ml\train_model.py
+```
 
-## Troubleshooting
+The trainer replaces the saved pipeline and writes evaluation/manifest files under `backend/model/`. Stop Flask before replacing the model, then restart it after training.
 
-| Symptom | Action |
-| --- | --- |
-| Missing Python module | Activate `.venv`; install `backend/requirements.txt`. |
-| Missing/incompatible model | Train with your current environment, then restart Flask. Do not load an untrusted artifact. |
-| Popup says detection service unavailable | Start/restart the current API; check `/health`. An older running server can return incompatible responses even if health is OK. |
-| Port 5000 occupied / macOS AirPlay conflict | Identify the process before stopping it. If choosing another port, update `backend/app.py`, `extension/background.js`, and the manifest host permission together; restart API and reload extension/pages. |
-| Extension changes do not appear | Reload the extension card, then reload every affected page. |
-| Records seem missing | Check the selected view, Current site vs All sites, browser profile and extension identity. Each view has a 200-record limit; older records are evicted. |
-| Save/export fails | Read the local action error in the warning/popup. Check disk/storage availability, download settings and profile policies; no record is reported saved before its transaction commits. |
-| Clear did not delete another category or downloaded file | Clear is intentionally limited to the selected view/scope. Delete exports separately. |
-| Incorrect did not change the prediction | Feedback is unreviewed data only. Save explicit human labels and curate examples manually before retraining. |
-| Browser tests cannot load the extension | Use a Chromium executable that allows unpacked-extension loading; configure `BROWSER_EXECUTABLE`. Test ports 5002/8766 must be free. |
+Optional Python tests:
+
+```bat
+python -m unittest discover -s tests -v
+```
+
+The optional browser test harness is in `tests/browser/`; see its README for Node.js setup and commands.
+
+## Feedback and data handling
+
+- Detections, reports and feedback are stored in the browser profile using IndexedDB; settings use `chrome.storage.local`.
+- Records are not automatically uploaded to a remote service.
+- **Incorrect** creates feedback for human review; it does not flip the original label or retrain the model.
+- Toxicity and profanity labels can be reviewed independently. Only reviewed, explicitly labelled examples should be considered for future dataset curation.
+- Export JSON and curate it manually before training. The trainer does not automatically import feedback exports.
+- Each records view is capped at 200 unique records across sites. Export useful reviewed feedback before it is evicted.
+- Load only trusted `.joblib` files; joblib/pickle artifacts can execute code when loaded.
+
+## Limitations
+
+- The model reflects the dataset's language, topics and annotation choices; it may misread sarcasm, quotations, reclaimed language, context, dialects and multilingual text.
+- The supplied toxicity dataset is not a comprehensive cyberbullying dataset, and the profanity list is manually maintained.
+- The model is not a probability estimator and does not prove intent, harassment or bullying.
+- The extension scans supported visible page text, not every browser surface, image, video, canvas or inaccessible cross-origin frame.
+- The API is configured for local use on `127.0.0.1`; do not expose it publicly without reviewing security and deployment settings.
+- The included manifest targets Chromium Manifest V3. Firefox support may require manifest/background compatibility changes and testing.
+
+## Project structure
+
+```text
+cyberbullying-profanity-checker-extension/
+├── backend/
+│   ├── app.py                       # Flask API
+│   ├── detector.py                  # ML policy + profanity rules
+│   ├── requirements.txt             # Python dependencies
+│   └── model/
+│       ├── toxicity_pipeline.joblib  # Trained TF-IDF + LinearSVC pipeline
+│       ├── metrics.json              # Dataset audit and evaluation metrics
+│       └── split_manifest.json       # Hashed split membership
+├── extension/
+│   ├── manifest.json                # Manifest V3 configuration
+│   ├── background.js                # API bridge and record writes
+│   ├── content.js                   # Webpage scanning/highlighting
+│   ├── popup.html / popup.js        # Popup interface and actions
+│   ├── popup.css                    # Popup styling
+│   └── records.js                   # Local records and feedback handling
+├── ml/
+│   ├── dataset.csv                  # Main labelled dataset
+│   ├── train_model.py               # Data cleaning, training and evaluation
+│   ├── train_on_colab.ipynb         # Optional Colab workflow
+│   ├── EVALUATION.md                # Detailed evaluation notes
+│   └── extra/README.md              # Additional dataset format
+├── tests/
+│   ├── test_evaluation.py
+│   ├── test_policy.py
+│   └── browser/                     # Optional browser test harness
+├── demo.html                        # Dynamic scanner demonstration
+├── records-demo.html                # Records behavior demonstration
+└── README.md
+```
+
+## Credits
+
+The original project/dataset are credited to [Chando0185 on GitHub](https://github.com/Chando0185). This repository includes changes to the browser extension, local Flask integration, training/evaluation pipeline, decision policy, records/feedback handling and documentation. Review the upstream repository's license and include any required attribution when redistributing.
+
+---
+
+**Project purpose:** assist with screening potentially abusive webpage text for review. It is not a substitute for human judgement or a definitive determination that cyberbullying has occurred.
