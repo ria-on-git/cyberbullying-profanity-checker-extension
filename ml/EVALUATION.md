@@ -1,5 +1,36 @@
 # Reproducible evaluation
 
+## Model v2 (word + character TF-IDF) — current model
+
+Features changed from word 1-2 grams only to **word 1-2 grams + character (`char_wb`) 2-5 grams**, still with LinearSVC and the same dataset, seed (42), cleaning and 60/20/20 split as v1, so v1 and v2 are measured on the identical test set. C is chosen from [0.25, 0.5, 1] by 3-fold training CV (selected: 1.0). Thresholds were re-selected on validation only: Relaxed 0.275, Balanced -0.2, Strict -0.425.
+
+Test results (3,405 samples; 1,295 non-toxic, 2,110 toxic; rows [non-toxic, toxic], columns [negative, positive]):
+
+| Result | Precision | Recall | F1 | Confusion matrix | Safe-text FP rate |
+| --- | ---: | ---: | ---: | --- | ---: |
+| Raw SVM, margin 0 | 0.9472 | 0.9351 | 0.9411 | [[1185, 110], [137, 1973]] | 8.49% |
+| relaxed: raw SVM | 0.9715 | 0.8872 | 0.9274 | [[1240, 55], [238, 1872]] | 4.25% |
+| relaxed: full toxicity policy | 0.9716 | 0.8754 | 0.9210 | [[1241, 54], [263, 1847]] | 4.17% |
+| relaxed: combined UI warning | 0.9580 | 0.9190 | 0.9381 | [[1210, 85], [171, 1939]] | 6.56% |
+| balanced: raw SVM | 0.9226 | 0.9607 | 0.9413 | [[1125, 170], [83, 2027]] | 13.13% |
+| balanced: full toxicity policy | 0.9225 | 0.9483 | 0.9353 | [[1127, 168], [109, 2001]] | 12.97% |
+| balanced: combined UI warning | 0.9146 | 0.9640 | 0.9386 | [[1105, 190], [76, 2034]] | 14.67% |
+| strict: raw SVM | 0.8865 | 0.9810 | 0.9314 | [[1030, 265], [40, 2070]] | 20.46% |
+| strict: full toxicity policy | 0.8867 | 0.9682 | 0.9257 | [[1034, 261], [67, 2043]] | 20.15% |
+| strict: combined UI warning | 0.8818 | 0.9763 | 0.9267 | [[1019, 276], [50, 2060]] | 21.31% |
+
+Change versus v1 on the same test split (policy toxicity): Relaxed precision 0.9545 → 0.9716 and safe-text FP 6.87% → 4.17%; Balanced F1 0.9291 → 0.9353; Strict F1 0.9108 → 0.9257 and safe-text FP 25.64% → 20.15%; raw SVM F1 0.9344 → 0.9411.
+
+Notes and caveats:
+
+- Metrics above are computed from SVM margin, eligibility and thresholds only. The explicit-threat rule (effective threshold capped at 0.0 for phrases such as "kill yourself") is applied at inference time and is not reflected in these figures.
+- This test set has already been used to compare v1 and v2; for an unbiased estimate keep a separate external evaluation set.
+- Known error that remains: casual or positive profanity ("This is fucking great", "This shit is amazing") can still be scored as toxic at Balanced. The earlier Strict neutral-sentence errors ("Have a wonderful day") no longer occur in the regression tests.
+- `tests/test_policy.py` contains sanity checks on model behaviour. After adding datasets they can fail legitimately; read a failure as a prompt to review the new model, not automatically as a code bug.
+
+Full numbers: `backend/model/metrics.json`. Sections below describe the methodology and the **original v1 results** (word-only features), kept for comparison.
+
+---
 Run from the repository root:
 
 ```bash

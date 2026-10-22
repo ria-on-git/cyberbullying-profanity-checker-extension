@@ -9,7 +9,7 @@ detector = Detector()
 
 @app.get('/health')
 def health():
-    return jsonify(status='ok', model='TF-IDF + LinearSVC')
+    return jsonify(status='ok', model='TF-IDF (word+char) + LinearSVC')
 
 @app.post('/predict')
 def predict():

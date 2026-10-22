@@ -1,4 +1,6 @@
 """Reproducible deduplicated train/validation/test evaluation; no test tuning."""
+import argparse
+import glob
 import hashlib
 import json
 import platform
@@ -10,6 +12,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import FeatureUnion
 from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
@@ -20,6 +23,43 @@ sys.path.insert(0, str(ROOT))
 from backend.detector import Detector
 
 SEED = 42
+
+
+def build_pipeline():
+    """Word (1-2 gram) + character (2-5 gram) TF-IDF feeding a LinearSVC.
+
+    Character n-grams recover obfuscated words (f*ck, sh1t, fuuuck), typos and
+    romanised Hindi/Hinglish spellings that a word vocabulary has never seen.
+    The detector reads the fitted word vectorizer through the name 'word'.
+    """
+    features = FeatureUnion([
+        ('word', TfidfVectorizer(lowercase=True, strip_accents='unicode', ngram_range=(1, 2),
+                                 min_df=2, max_features=80000, sublinear_tf=True)),
+        ('char', TfidfVectorizer(lowercase=True, strip_accents='unicode', analyzer='char_wb',
+                                 ngram_range=(2, 5), min_df=3, max_features=150000,
+                                 sublinear_tf=True)),
+    ])
+    return Pipeline([('tfidf', features), ('svc', LinearSVC(random_state=SEED))])
+
+
+def load_extra(paths):
+    """Load extra labelled CSVs and convert them to the source format (-1 toxic, 0 non-toxic).
+
+    Each file needs a text column (text or headline) and a label column where
+    1 or -1 means toxic and 0 means non-toxic. Rows with other labels are rejected.
+    """
+    frames, hashes = [], {}
+    for path in paths:
+        raw = pd.read_csv(path)
+        text_col = next((c for c in ('text', 'headline') if c in raw.columns), None)
+        if text_col is None or 'label' not in raw.columns:
+            raise ValueError(f'{path}: needs a text (or headline) column and a label column')
+        label = raw['label'].map({1: -1, -1: -1, 0: 0})
+        if label.isna().any():
+            raise ValueError(f'{path}: labels must be 1/-1 (toxic) or 0 (non-toxic)')
+        frames.append(pd.DataFrame({'headline': raw[text_col].fillna('').astype(str), 'label': label.astype(int)}))
+        hashes[Path(path).name] = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    return frames, hashes
 
 
 def prepare(data):
@@ -99,17 +139,22 @@ def evaluate(detector, frame):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Train and evaluate the CyberShield toxicity model.')
+    parser.add_argument('--extra', nargs='*', default=None,
+                        help='Extra labelled CSVs (text,label). Default: every ml/extra/*.csv')
+    args = parser.parse_args()
     data_path = ROOT / 'ml/dataset.csv'
-    clean, audit = prepare(pd.read_csv(data_path))
+    extra_paths = args.extra if args.extra is not None else sorted(glob.glob(str(ROOT / 'ml/extra/*.csv')))
+    extra_frames, extra_hashes = load_extra(extra_paths)
+    base = pd.read_csv(data_path)
+    clean, audit = prepare(pd.concat([base] + extra_frames, ignore_index=True))
+    audit['extra_files'] = list(extra_hashes)
     train, rest = train_test_split(clean, test_size=.4, random_state=SEED, stratify=clean.label)
     validation, test = train_test_split(rest, test_size=.5, random_state=SEED, stratify=rest.label)
     splits = {'train': train, 'validation': validation, 'test': test}
     for a, b in [('train', 'validation'), ('train', 'test'), ('validation', 'test')]:
         assert set(splits[a].key).isdisjoint(splits[b].key)
-    pipe = Pipeline([('tfidf', TfidfVectorizer(lowercase=True, strip_accents='unicode',
-        ngram_range=(1, 2), min_df=2, max_features=80000, sublinear_tf=True)),
-        ('svc', LinearSVC(random_state=SEED))])
-    search = GridSearchCV(pipe, {'svc__C': [.25, 1., 2.]}, scoring='f1',
+    search = GridSearchCV(build_pipeline(), {'svc__C': [.25, .5, 1.]}, scoring='f1',
         cv=StratifiedKFold(3, shuffle=True, random_state=SEED), n_jobs=1)
     search.fit(train.text, train.label)
     model = search.best_estimator_
@@ -124,6 +169,8 @@ def main():
     model.cybershield_thresholds_ = thresholds
     detector = Detector(pipeline=model)
     report = {'dataset_sha256': hashlib.sha256(data_path.read_bytes()).hexdigest(),
+        'extra_datasets_sha256': extra_hashes,
+        'model': 'word 1-2gram + char_wb 2-5gram TF-IDF + LinearSVC',
         'seed': SEED, 'versions': {'python': platform.python_version(), 'sklearn': sklearn.__version__,
                                   'numpy': np.__version__, 'pandas': pd.__version__},
         'audit': audit, 'split_sizes': {name: len(frame) for name, frame in splits.items()},

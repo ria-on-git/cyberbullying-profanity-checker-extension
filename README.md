@@ -1,6 +1,6 @@
 # CyberShield AI — local screening and reviewed feedback
 
-CyberShield scans suitable visible webpage text with **TF-IDF + LinearSVC** and a separate complete-token profanity rule. It highlights potential toxicity or profanity and keeps detections, local reports, and incorrect-prediction feedback in your browser profile. A result is screening evidence, not proof of bullying. **Saving a report does not notify the website or its moderators.**
+CyberShield scans suitable visible webpage text with **word + character TF-IDF + LinearSVC** and a separate complete-token profanity rule. It highlights potential toxicity or profanity and keeps detections, local reports, and incorrect-prediction feedback in your browser profile. A result is screening evidence, not proof of bullying. **Saving a report does not notify the website or its moderators.**
 
 The supplied dataset is `ml/dataset.csv`: `headline` is text, label `-1` means toxic and `0` means non-toxic. The original project/dataset are credited to [Chando0185](https://github.com/Chando0185); check the upstream license before redistribution.
 
@@ -31,9 +31,9 @@ Open **http://127.0.0.1:8765/records-demo.html**. It contains harmless labels an
 
 ## Scanning and decisions
 
-- The API owns sensitivity decisions; the extension displays the returned decision rather than applying another margin threshold. The supplied retrained artifact uses Relaxed `0.15`, Balanced `-0.15`, Strict `-0.40`. Thresholds were selected on validation data: Relaxed favours precision (F0.5), Balanced balances precision/recall (F1), Strict favours recall (F2). An SVM margin is **not a probability**.
+- The API owns sensitivity decisions; the extension displays the returned decision rather than applying another margin threshold. The supplied retrained artifact uses Relaxed `0.275`, Balanced `-0.2`, Strict `-0.425`. Explicit threat phrases ("kill yourself", "go die") cap their effective threshold at `0.0`, and the returned `threshold` reflects that. Thresholds were selected on validation data: Relaxed favours precision (F0.5), Balanced balances precision/recall (F1), Strict favours recall (F2). An SVM margin is **not a probability**.
 - Empty TF-IDF vectors and insufficient recognised text return `insufficient_information`, not an abuse classification. Short neutral labels cannot be classified from the SVM score alone. Brief insult/threat cues permit short messages to be assessed by the SVM; coverage is limited.
-- Profanity is a separate result, matched as complete Unicode word tokens after limited leetspeak normalization. A profanity-only warning does not establish bullying. The ML classifier can still make contextual errors on casual profanity or quotations.
+- Profanity is a separate result, matched as complete Unicode word tokens after limited leetspeak normalization, masked spellings (`f*ck`, `sh*t`) and stretched letters (`fuuuck`). The list includes some common romanised Hindi terms; the ML model only judges Hinglish context if you train it on Hinglish data. A profanity-only warning does not establish bullying. The ML classifier can still make contextual errors on casual profanity or quotations.
 - The scanner queues affected visible leaf blocks, avoids forms, editable fields, navigation, hidden text, and its own UI, and handles added/edited/removed content. Full discovery occurs on initial/manual scans or settings changes; mutations inspect affected subtrees. Old responses cannot reapply warnings after edits or disabling. Original outline values/priorities are restored without overwriting subsequent page changes.
 - Warnings use closed Shadow DOM. **Why?** shows the actual ML assessment, sensitivity/threshold, margin, and separate profanity terms. **Report** saves a local record. **Incorrect** saves unreviewed feedback and dismisses that warning. **Ignore** dismisses the warning without feedback.
 - The popup distinguishes scanning, completion, no detections, disabled protection, and API unavailable. Sensitivity changes reevaluate existing text. Current warning counts and stored record counts are separate.
@@ -66,6 +66,12 @@ In Feedback, choose human toxicity `Toxic`, `Non-toxic`, `Uncertain`, or leave i
 
 For later improvement, a human must inspect reviewed exports, resolve ambiguous/context-dependent cases, and decide whether the text belongs in this dataset. Only reviewed examples explicitly labelled `toxic` or `non_toxic` are candidates for toxicity training (`-1` and `0` respectively in `ml/dataset.csv`). Null or `uncertain` labels must not be converted to an opposite class. Profanity labels are independent and must not be substituted for toxicity labels. Reconcile duplicates and label conflicts before adding any examples. **There is no automatic feedback import, label flipping, or retraining.** Export files are never read by the API or trainer unless you manually curate the source dataset.
 
+## Adding datasets and training on Colab
+
+Extra labelled data improves accuracy more than any algorithm change. Put CSVs with `text,label` columns (`1` toxic, `0` non-toxic) in `ml/extra/`; `python ml/train_model.py` merges them with `ml/dataset.csv`, deduplicates, splits and retrains (see `ml/extra/README.md`). Pass specific files with `--extra a.csv b.csv`.
+
+For large datasets use `ml/train_on_colab.ipynb`: upload the project zip, add datasets with the `add_dataset` helper, train, then download `backend/model/` and copy it over the local `backend/model/`. The local scikit-learn version must match the one used for training (`pip install scikit-learn==<version>`), or retrain locally. Restart the API after replacing the model.
+
 ## Retraining and evaluation
 
 Stop/restart the API around a model replacement. From the project root:
@@ -92,7 +98,7 @@ Reloading the same unpacked extension preserves IndexedDB records. Uninstalling 
 
 ## Tests and saved evidence
 
-Verified result: **22 browser scenarios passed**. The concurrent-save check retained all 50 unique reports, while 20 duplicate attempts created one record. Python checks: **10 passed, two documented expected failures** for existing model errors. JavaScript syntax checks passed for all changed extension scripts and the browser harness.
+Python checks for the current model (word+char, v2): **13 passed, one documented expected failure** (casual profanity such as "This shit is amazing" scored as toxic). The 22-scenario browser harness result recorded under `tests/browser/artifacts/` was produced with the original v1 model and has **not been re-run** for v2; no extension JavaScript changed. Re-run it with the commands below on a machine with a compatible Chromium. Model-behaviour tests can legitimately fail after you add datasets; review the new model before changing a test.
 
 Python regression checks:
 

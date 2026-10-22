@@ -1,10 +1,12 @@
 {
   "dataset_sha256": "22ddd5eea0d10052ad0b9dccd6e8a1fafa47aa8843cac9bdc140bc0cdf98edee",
+  "extra_datasets_sha256": {},
+  "model": "word 1-2gram + char_wb 2-5gram TF-IDF + LinearSVC",
   "seed": 42,
   "versions": {
-    "python": "3.13.14",
-    "sklearn": "1.9.1",
-    "numpy": "2.5.4",
+    "python": "3.14.2",
+    "sklearn": "1.9.0",
+    "numpy": "2.4.1",
     "pandas": "2.3.3"
   },
   "audit": {
@@ -22,7 +24,8 @@
     "conflicting_groups": 3,
     "conflicting_rows": 9,
     "empty_equivalent_rows": 2,
-    "retained_rows": 17023
+    "retained_rows": 17023,
+    "extra_files": []
   },
   "split_sizes": {
     "train": 10213,
@@ -32,15 +35,15 @@
   "best_params": {
     "svc__C": 1.0
   },
-  "cv_training_f1": 0.9298898657021124,
+  "cv_training_f1": 0.9397548379863038,
   "threshold_selection": {
     "source": "validation only",
     "grid": "[-2, 3] step 0.025",
     "objective": "Policy F0.5 relaxed, F1 balanced, F2 strict; abstentions count as no toxicity flag; relaxed >= balanced >= strict; ties prefer higher threshold",
     "thresholds": {
-      "relaxed": 0.15,
-      "balanced": -0.15,
-      "strict": -0.4
+      "relaxed": 0.275,
+      "balanced": -0.2,
+      "strict": -0.425
     }
   },
   "metric_notes": "Confusion rows true [non-toxic,toxic], columns predicted [negative,positive]. Abstentions count as negative in end-to-end metrics. Three-way columns [assessed negative,assessed positive,insufficient]. UI warning includes profanity and is not an abuse classification.",
@@ -51,22 +54,22 @@
       "1": 2110
     },
     "raw_svm_default_zero": {
-      "precision": 0.9391727493917275,
-      "recall": 0.9146919431279621,
-      "f1": 0.9267707082833133,
+      "precision": 0.9511480214948705,
+      "recall": 0.9227488151658768,
+      "f1": 0.9367332210728891,
       "confusion_matrix": [
         [
-          1170,
-          125
+          1195,
+          100
         ],
         [
-          180,
-          1930
+          163,
+          1947
         ]
       ],
-      "safe_text_false_positives": 125,
+      "safe_text_false_positives": 100,
       "safe_text_count": 1295,
-      "safe_text_false_positive_rate": 0.09652509652509653
+      "safe_text_false_positive_rate": 0.07722007722007722
     },
     "insufficient_information": {
       "total": 38,
@@ -77,272 +80,272 @@
     },
     "sensitivities": {
       "relaxed": {
-        "threshold": 0.15,
+        "threshold": 0.275,
         "raw_classifier": {
-          "precision": 0.9564772145417306,
-          "recall": 0.885308056872038,
-          "f1": 0.9195175978341127,
+          "precision": 0.9725593667546174,
+          "recall": 0.8734597156398104,
+          "f1": 0.9203495630461923,
           "confusion_matrix": [
             [
-              1210,
-              85
+              1243,
+              52
             ],
             [
-              242,
-              1868
+              267,
+              1843
             ]
           ],
-          "safe_text_false_positives": 85,
+          "safe_text_false_positives": 52,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.06563706563706563
+          "safe_text_false_positive_rate": 0.040154440154440155
         },
         "policy_toxicity": {
-          "precision": 0.9570170895908856,
-          "recall": 0.875829383886256,
-          "f1": 0.9146250927988122,
+          "precision": 0.9738247863247863,
+          "recall": 0.8639810426540284,
+          "f1": 0.9156202913108991,
           "confusion_matrix": [
             [
-              1212,
-              83
+              1246,
+              49
             ],
             [
-              262,
-              1848
+              287,
+              1823
             ]
           ],
-          "safe_text_false_positives": 83,
+          "safe_text_false_positives": 49,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.06409266409266409
+          "safe_text_false_positive_rate": 0.03783783783783784
         },
         "policy_three_way_confusion": [
           [
-            1196,
-            83,
+            1230,
+            49,
             16
           ],
           [
-            240,
-            1848,
+            265,
+            1823,
             22
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.9570170895908856,
-          "recall": 0.8850574712643678,
-          "f1": 0.9196317491913412,
+          "precision": 0.9738247863247863,
+          "recall": 0.8730842911877394,
+          "f1": 0.9207070707070707,
           "confusion_matrix": [
             [
-              1196,
-              83
+              1230,
+              49
             ],
             [
-              240,
-              1848
+              265,
+              1823
             ]
           ],
-          "safe_text_false_positives": 83,
+          "safe_text_false_positives": 49,
           "safe_text_count": 1279,
-          "safe_text_false_positive_rate": 0.06489444878811572
+          "safe_text_false_positive_rate": 0.03831118060985145
         },
         "combined_ui_warning": {
-          "precision": 0.9525222551928784,
-          "recall": 0.9127962085308057,
-          "f1": 0.9322362052274927,
+          "precision": 0.961,
+          "recall": 0.9109004739336493,
+          "f1": 0.9352798053527981,
           "confusion_matrix": [
             [
-              1199,
-              96
+              1217,
+              78
             ],
             [
-              184,
-              1926
+              188,
+              1922
             ]
           ],
-          "safe_text_false_positives": 96,
+          "safe_text_false_positives": 78,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.07413127413127413
+          "safe_text_false_positive_rate": 0.06023166023166023
         }
       },
       "balanced": {
-        "threshold": -0.15,
+        "threshold": -0.2,
         "raw_classifier": {
-          "precision": 0.9174354243542435,
-          "recall": 0.942654028436019,
-          "f1": 0.9298737727910238,
+          "precision": 0.9290322580645162,
+          "recall": 0.9554502369668246,
+          "f1": 0.9420560747663551,
           "confusion_matrix": [
             [
-              1116,
-              179
+              1141,
+              154
             ],
             [
-              121,
-              1989
+              94,
+              2016
             ]
           ],
-          "safe_text_false_positives": 179,
+          "safe_text_false_positives": 154,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.13822393822393822
+          "safe_text_false_positive_rate": 0.11891891891891893
         },
         "policy_toxicity": {
-          "precision": 0.918338777414839,
-          "recall": 0.9327014218009478,
-          "f1": 0.9254643780860569,
+          "precision": 0.9300699300699301,
+          "recall": 0.9454976303317536,
+          "f1": 0.9377203290246768,
           "confusion_matrix": [
             [
-              1120,
-              175
+              1145,
+              150
             ],
             [
-              142,
-              1968
+              115,
+              1995
             ]
           ],
-          "safe_text_false_positives": 175,
+          "safe_text_false_positives": 150,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.13513513513513514
+          "safe_text_false_positive_rate": 0.11583011583011583
         },
         "policy_three_way_confusion": [
           [
-            1104,
-            175,
+            1129,
+            150,
             16
           ],
           [
-            120,
-            1968,
+            93,
+            1995,
             22
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.918338777414839,
-          "recall": 0.9425287356321839,
-          "f1": 0.9302765303710707,
+          "precision": 0.9300699300699301,
+          "recall": 0.9554597701149425,
+          "f1": 0.9425939050318922,
           "confusion_matrix": [
             [
-              1104,
-              175
+              1129,
+              150
             ],
             [
-              120,
-              1968
+              93,
+              1995
             ]
           ],
-          "safe_text_false_positives": 175,
+          "safe_text_false_positives": 150,
           "safe_text_count": 1279,
-          "safe_text_false_positive_rate": 0.13682564503518374
+          "safe_text_false_positive_rate": 0.11727912431587177
         },
         "combined_ui_warning": {
-          "precision": 0.916970802919708,
-          "recall": 0.95260663507109,
-          "f1": 0.9344490934449093,
+          "precision": 0.9230072463768116,
+          "recall": 0.9658767772511848,
+          "f1": 0.9439555349698935,
           "confusion_matrix": [
             [
-              1113,
-              182
+              1125,
+              170
             ],
             [
-              100,
-              2010
+              72,
+              2038
             ]
           ],
-          "safe_text_false_positives": 182,
+          "safe_text_false_positives": 170,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.14054054054054055
+          "safe_text_false_positive_rate": 0.13127413127413126
         }
       },
       "strict": {
-        "threshold": -0.4,
+        "threshold": -0.425,
         "raw_classifier": {
-          "precision": 0.8537794299876085,
-          "recall": 0.9796208530805687,
-          "f1": 0.912381372765394,
+          "precision": 0.878864887759424,
+          "recall": 0.9834123222748815,
+          "f1": 0.9282039812122568,
           "confusion_matrix": [
             [
-              941,
-              354
+              1009,
+              286
             ],
             [
-              43,
-              2067
+              35,
+              2075
             ]
           ],
-          "safe_text_false_positives": 354,
+          "safe_text_false_positives": 286,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.27335907335907333
+          "safe_text_false_positive_rate": 0.22084942084942086
         },
         "policy_toxicity": {
-          "precision": 0.8553511705685619,
-          "recall": 0.9696682464454977,
-          "f1": 0.9089293647267881,
+          "precision": 0.8796573875802998,
+          "recall": 0.9734597156398104,
+          "f1": 0.9241844769403824,
           "confusion_matrix": [
             [
-              949,
-              346
+              1014,
+              281
             ],
             [
-              64,
-              2046
+              56,
+              2054
             ]
           ],
-          "safe_text_false_positives": 346,
+          "safe_text_false_positives": 281,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.2671814671814672
+          "safe_text_false_positive_rate": 0.21698841698841698
         },
         "policy_three_way_confusion": [
           [
-            933,
-            346,
+            998,
+            281,
             16
           ],
           [
-            42,
-            2046,
+            34,
+            2054,
             22
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.8553511705685619,
-          "recall": 0.9798850574712644,
-          "f1": 0.9133928571428571,
+          "precision": 0.8796573875802998,
+          "recall": 0.9837164750957854,
+          "f1": 0.9287813701107845,
           "confusion_matrix": [
             [
-              933,
-              346
+              998,
+              281
             ],
             [
-              42,
-              2046
+              34,
+              2054
             ]
           ],
-          "safe_text_false_positives": 346,
+          "safe_text_false_positives": 281,
           "safe_text_count": 1279,
-          "safe_text_false_positive_rate": 0.2705238467552776
+          "safe_text_false_positive_rate": 0.21970289288506645
         },
         "combined_ui_warning": {
-          "precision": 0.8550124275062138,
-          "recall": 0.9781990521327014,
-          "f1": 0.9124668435013262,
+          "precision": 0.8758445945945946,
+          "recall": 0.9829383886255925,
+          "f1": 0.9263063867798124,
           "confusion_matrix": [
             [
-              945,
-              350
+              1001,
+              294
             ],
             [
-              46,
-              2064
+              36,
+              2074
             ]
           ],
-          "safe_text_false_positives": 350,
+          "safe_text_false_positives": 294,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.2702702702702703
+          "safe_text_false_positive_rate": 0.22702702702702704
         }
       }
     },
     "profanity_rule": {
-      "flag_count": 1167,
+      "flag_count": 1267,
       "by_toxicity_label": {
-        "0": 32,
-        "1": 1135
+        "0": 42,
+        "1": 1225
       },
       "note": "No profanity ground truth: toxicity labels cannot measure profanity accuracy."
     }
@@ -354,22 +357,22 @@
       "1": 2110
     },
     "raw_svm_default_zero": {
-      "precision": 0.9413179413179413,
-      "recall": 0.9274881516587677,
-      "f1": 0.934351873955598,
+      "precision": 0.9471915506481037,
+      "recall": 0.9350710900473934,
+      "f1": 0.9410922966849511,
       "confusion_matrix": [
         [
-          1173,
-          122
+          1185,
+          110
         ],
         [
-          153,
-          1957
+          137,
+          1973
         ]
       ],
-      "safe_text_false_positives": 122,
+      "safe_text_false_positives": 110,
       "safe_text_count": 1295,
-      "safe_text_false_positive_rate": 0.09420849420849421
+      "safe_text_false_positive_rate": 0.08494208494208494
     },
     "insufficient_information": {
       "total": 39,
@@ -380,272 +383,272 @@
     },
     "sensitivities": {
       "relaxed": {
-        "threshold": 0.15,
+        "threshold": 0.275,
         "raw_classifier": {
-          "precision": 0.9550731953558809,
-          "recall": 0.8966824644549763,
-          "f1": 0.9249572231728184,
+          "precision": 0.97145822522055,
+          "recall": 0.8872037914691943,
+          "f1": 0.9274213524894723,
           "confusion_matrix": [
             [
-              1206,
-              89
+              1240,
+              55
             ],
             [
-              218,
-              1892
+              238,
+              1872
             ]
           ],
-          "safe_text_false_positives": 89,
+          "safe_text_false_positives": 55,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.06872586872586872
+          "safe_text_false_positive_rate": 0.04247104247104247
         },
         "policy_toxicity": {
-          "precision": 0.9545454545454546,
-          "recall": 0.885781990521327,
-          "f1": 0.9188790560471977,
+          "precision": 0.9715938979484482,
+          "recall": 0.8753554502369668,
+          "f1": 0.9209673398155074,
           "confusion_matrix": [
             [
-              1206,
-              89
+              1241,
+              54
             ],
             [
-              241,
-              1869
+              263,
+              1847
             ]
           ],
-          "safe_text_false_positives": 89,
+          "safe_text_false_positives": 54,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.06872586872586872
+          "safe_text_false_positive_rate": 0.0416988416988417
         },
         "policy_three_way_confusion": [
           [
-            1194,
-            89,
+            1229,
+            54,
             12
           ],
           [
-            214,
-            1869,
+            236,
+            1847,
             27
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.9545454545454546,
-          "recall": 0.8972635621699472,
-          "f1": 0.9250185597624351,
+          "precision": 0.9715938979484482,
+          "recall": 0.886701872299568,
+          "f1": 0.9272088353413654,
           "confusion_matrix": [
             [
-              1194,
-              89
+              1229,
+              54
             ],
             [
-              214,
-              1869
+              236,
+              1847
             ]
           ],
-          "safe_text_false_positives": 89,
+          "safe_text_false_positives": 54,
           "safe_text_count": 1283,
-          "safe_text_false_positive_rate": 0.06936866718628215
+          "safe_text_false_positive_rate": 0.042088854247856584
         },
         "combined_ui_warning": {
-          "precision": 0.9504901960784313,
+          "precision": 0.9580039525691699,
           "recall": 0.918957345971564,
-          "f1": 0.9344578313253012,
+          "f1": 0.9380745041122399,
           "confusion_matrix": [
             [
-              1194,
-              101
+              1210,
+              85
             ],
             [
               171,
               1939
             ]
           ],
-          "safe_text_false_positives": 101,
+          "safe_text_false_positives": 85,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.077992277992278
+          "safe_text_false_positive_rate": 0.06563706563706563
         }
       },
       "balanced": {
-        "threshold": -0.15,
+        "threshold": -0.2,
         "raw_classifier": {
-          "precision": 0.9201468563561267,
-          "recall": 0.9502369668246445,
-          "f1": 0.9349498717649802,
+          "precision": 0.9226217569412836,
+          "recall": 0.9606635071090047,
+          "f1": 0.9412584165312282,
           "confusion_matrix": [
             [
-              1121,
-              174
+              1125,
+              170
             ],
             [
-              105,
-              2005
+              83,
+              2027
             ]
           ],
-          "safe_text_false_positives": 174,
+          "safe_text_false_positives": 170,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.13436293436293437
+          "safe_text_false_positive_rate": 0.13127413127413126
         },
         "policy_toxicity": {
-          "precision": 0.9200743494423792,
-          "recall": 0.9383886255924171,
-          "f1": 0.9291412482402628,
+          "precision": 0.9225449515905948,
+          "recall": 0.9483412322274881,
+          "f1": 0.9352652488899276,
           "confusion_matrix": [
             [
-              1123,
-              172
+              1127,
+              168
             ],
             [
-              130,
-              1980
+              109,
+              2001
             ]
           ],
-          "safe_text_false_positives": 172,
+          "safe_text_false_positives": 168,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.13281853281853281
+          "safe_text_false_positive_rate": 0.12972972972972974
         },
         "policy_three_way_confusion": [
           [
-            1111,
-            172,
+            1115,
+            168,
             12
           ],
           [
-            103,
-            1980,
+            82,
+            2001,
             27
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.9200743494423792,
-          "recall": 0.9505520883341335,
-          "f1": 0.935064935064935,
-          "confusion_matrix": [
-            [
-              1111,
-              172
-            ],
-            [
-              103,
-              1980
-            ]
-          ],
-          "safe_text_false_positives": 172,
-          "safe_text_count": 1283,
-          "safe_text_false_positive_rate": 0.13406079501169135
-        },
-        "combined_ui_warning": {
-          "precision": 0.9178832116788321,
-          "recall": 0.9535545023696682,
-          "f1": 0.9353788935378894,
+          "precision": 0.9225449515905948,
+          "recall": 0.9606337013922227,
+          "f1": 0.9412041392285984,
           "confusion_matrix": [
             [
               1115,
-              180
+              168
             ],
             [
-              98,
-              2012
+              82,
+              2001
             ]
           ],
-          "safe_text_false_positives": 180,
+          "safe_text_false_positives": 168,
+          "safe_text_count": 1283,
+          "safe_text_false_positive_rate": 0.1309431021044427
+        },
+        "combined_ui_warning": {
+          "precision": 0.914568345323741,
+          "recall": 0.9639810426540284,
+          "f1": 0.9386248269497001,
+          "confusion_matrix": [
+            [
+              1105,
+              190
+            ],
+            [
+              76,
+              2034
+            ]
+          ],
+          "safe_text_false_positives": 190,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.138996138996139
+          "safe_text_false_positive_rate": 0.14671814671814673
         }
       },
       "strict": {
-        "threshold": -0.4,
+        "threshold": -0.425,
         "raw_classifier": {
-          "precision": 0.8602910602910603,
-          "recall": 0.9805687203791469,
-          "f1": 0.9165005537098561,
+          "precision": 0.8865096359743041,
+          "recall": 0.981042654028436,
+          "f1": 0.9313835770528683,
           "confusion_matrix": [
             [
-              959,
-              336
+              1030,
+              265
             ],
             [
-              41,
-              2069
+              40,
+              2070
             ]
           ],
-          "safe_text_false_positives": 336,
+          "safe_text_false_positives": 265,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.2594594594594595
+          "safe_text_false_positive_rate": 0.20463320463320464
         },
         "policy_toxicity": {
-          "precision": 0.8601516427969671,
-          "recall": 0.9677725118483412,
-          "f1": 0.9107939339875112,
+          "precision": 0.88671875,
+          "recall": 0.9682464454976303,
+          "f1": 0.9256909832351609,
           "confusion_matrix": [
             [
-              963,
-              332
+              1034,
+              261
             ],
             [
-              68,
-              2042
+              67,
+              2043
             ]
           ],
-          "safe_text_false_positives": 332,
+          "safe_text_false_positives": 261,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.25637065637065637
+          "safe_text_false_positive_rate": 0.20154440154440154
         },
         "policy_three_way_confusion": [
           [
-            951,
-            332,
+            1022,
+            261,
             12
           ],
           [
-            41,
-            2042,
+            40,
+            2043,
             27
           ]
         ],
         "policy_assessed_only": {
-          "precision": 0.8601516427969671,
-          "recall": 0.9803168506961114,
-          "f1": 0.9163114202378282,
+          "precision": 0.88671875,
+          "recall": 0.9807969275084013,
+          "f1": 0.9313881923865968,
           "confusion_matrix": [
             [
-              951,
-              332
+              1022,
+              261
             ],
             [
-              41,
-              2042
+              40,
+              2043
             ]
           ],
-          "safe_text_false_positives": 332,
+          "safe_text_false_positives": 261,
           "safe_text_count": 1283,
-          "safe_text_false_positive_rate": 0.2587685113016368
+          "safe_text_false_positive_rate": 0.2034294621979735
         },
         "combined_ui_warning": {
-          "precision": 0.8586365537432037,
-          "recall": 0.9729857819905213,
-          "f1": 0.9122417240613198,
+          "precision": 0.8818493150684932,
+          "recall": 0.976303317535545,
+          "f1": 0.9266756635177688,
           "confusion_matrix": [
             [
-              957,
-              338
+              1019,
+              276
             ],
             [
-              57,
-              2053
+              50,
+              2060
             ]
           ],
-          "safe_text_false_positives": 338,
+          "safe_text_false_positives": 276,
           "safe_text_count": 1295,
-          "safe_text_false_positive_rate": 0.261003861003861
+          "safe_text_false_positive_rate": 0.21312741312741312
         }
       }
     },
     "profanity_rule": {
-      "flag_count": 1171,
+      "flag_count": 1276,
       "by_toxicity_label": {
-        "0": 39,
-        "1": 1132
+        "0": 53,
+        "1": 1223
       },
       "note": "No profanity ground truth: toxicity labels cannot measure profanity accuracy."
     }
